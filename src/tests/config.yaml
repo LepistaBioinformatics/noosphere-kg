@@ -1,0 +1,25 @@
+strict_mode: false
+#allowed_nodes:
+#  - "Location"
+#  - "Microorganism"
+#  - "Compound"
+#  - "Enzyme"
+#  - "Gene"
+#allowed_relationships:
+#  - [ Microorganism, CONTAINED_IN, Location ]
+#  - [ Microorganism, PRODUCES, Compound ]
+#  - [ Microorganism, PRODUCES, Enzyme ]
+#  - [ Microorganism, PRODUCES, Gene ]
+#node_properties:
+#  - "scientific_name"
+#  - "strain_name"
+#  - "organism_name"
+#  - "compound_name"
+#  - "enzyme_name"
+#  - "gene_name"
+#  - "protein_name"
+#  - "metabolite_name"
+#  - "crop_name"
+#relationship_properties:
+#  - "production_date"
+#  - "crop_name"
