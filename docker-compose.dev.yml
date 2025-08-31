@@ -1,0 +1,17 @@
+services:
+  neo4j:
+    image: neo4j:latest
+    volumes:
+        - ./neo4j/logs:/logs
+        - ./neo4j/config:/config
+        - ./neo4j/data:/data
+        - ./neo4j/plugins:/plugins
+    environment:
+        - NEO4J_AUTH=neo4j/asdf1234
+        - NEO4J_PLUGINS=["apoc"] # Enable APOC plugin
+        - NEO4J_dbms_security_procedures_unrestricted=apoc.* # Allow APOC procedures
+        - NEO4J_dbms_security_procedures_allowlist=apoc.* # Whitelist APOC procedures
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    restart: always

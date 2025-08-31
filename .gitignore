@@ -1,0 +1,14 @@
+# Python
+.venv/
+
+# Neo4j
+neo4j/
+
+# Manuscripts
+manuscripts/
+
+# Graph data
+graph_data.json
+
+# Test scripts
+*.ipynb
