@@ -1,7 +1,9 @@
-# Stellar Knowledge Graph
+# Stellar Knowledge Graph Builder
 
-A powerful tool for building knowledge graphs from unstructured text using Large
-Language Models (LLMs) and the LangChain LLM Graph Transformer.
+A powerful CLI tool for building knowledge graphs from unstructured text
+documents using Large Language Models (LLMs) and the LangChain LLM Graph
+Transformer. This project specializes in **tool-based extraction** for more
+accurate and consistent knowledge graph construction.
 
 ## What is a Knowledge Graph?
 
@@ -27,54 +29,62 @@ Knowledge graphs are particularly valuable for:
 
 ## How It Works
 
-The Stellar Knowledge Graph project leverages LangChain's LLM Graph Transformer
-to automatically extract structured information from unstructured text
-documents. Here's how the process works:
+The Stellar Knowledge Graph Builder leverages LangChain's LLM Graph Transformer
+with **tool-based extraction** to automatically extract structured information
+from unstructured text documents. Here's how the process works:
 
 ### 1. Document Processing
 
-The system can process various document formats:
+The system processes various document formats using the `docling` library:
 
-- PDF manuscripts (using docling for conversion)
+- PDF manuscripts (automatically converted to markdown)
 - Plain text documents
-- Any document that can be converted to text format
+- Any document format supported by docling
 
-### 2. LLM-Powered Extraction
+### 2. Tool-Based LLM Extraction
 
-The LLM Graph Transformer operates in two modes:
+The system uses **tool-based extraction** exclusively, which provides:
 
-#### Tool-Based Mode (Default)
+- **Structured Output**: Uses LLMs with function calling capabilities (like
+  GPT-4) for more accurate extraction
+- **Consistent Results**: Leverages predefined schemas for entities and
+  relationships
+- **Property Extraction**: Supports detailed property extraction for both nodes
+  and relationships
+- **Validation**: Ensures extracted data conforms to defined rules and
+  constraints
 
-- Uses LLMs with structured output capabilities (like GPT-4)
-- Leverages function calling to extract entities and relationships
-- Provides more accurate and consistent results
-- Supports property extraction for both nodes and relationships
+### 3. Configurable Graph Rules
 
-#### Prompt-Based Mode (Fallback)
+The system uses YAML configuration files to define:
 
-- Uses few-shot prompting for LLMs without tool support
-- Parses LLM output through custom functions
-- Converts results to structured format
+- **Allowed Nodes**: Specific entity types that can be extracted (e.g.,
+  Microorganism, Compound, Enzyme, Gene)
+- **Allowed Relationships**: Valid connections between entities (e.g.,
+  "PRODUCES", "ACTS_IN", "AFFECTS")
+- **Node Properties**: Attributes for entities (e.g., scientific_name,
+  strain_name, description)
+- **Relationship Properties**: Attributes for connections (e.g.,
+  production_date, reference_id)
+- **Text Processing**: Chunk size, overlap, and other text splitting parameters
 
-### 3. Graph Construction
+### 4. Graph Construction
 
 The extracted information is structured into:
 
-- **Nodes**: Entities like people, organizations, locations, compounds,
-  microorganisms
-- **Relationships**: Connections between entities (e.g., "WORKS_AT", "PRODUCES",
-  "CONTAINED_IN")
-- **Properties**: Additional attributes for nodes and relationships (e.g.,
-  dates, names, descriptions)
+- **Nodes**: Entities defined in the configuration (e.g., microorganisms,
+  compounds, enzymes)
+- **Relationships**: Connections between entities with specific relationship
+  types
+- **Properties**: Additional attributes for nodes and relationships
 
-### 4. Database Storage
+### 5. Neo4j Database Storage
 
-The constructed knowledge graph is stored in Neo4j, a powerful graph database
-that provides:
+The constructed knowledge graph is stored in Neo4j, providing:
 
-- Native graph operations
+- Native graph operations and querying
 - Built-in visualization capabilities
-- Efficient querying and traversal
+- Efficient traversal and relationship exploration
 - Scalability for large knowledge graphs
 
 ## Getting Started
@@ -83,7 +93,7 @@ that provides:
 
 - Python 3.12+
 - Neo4j database (local or cloud instance)
-- OpenAI API key (or other compatible LLM provider)
+- OpenAI API key (for GPT-4 tool-based extraction)
 
 ### Installation
 
@@ -109,34 +119,139 @@ that provides:
 
 ### Configuration
 
-1. Set up your Neo4j database connection in the `docker-compose.dev.yml` file
-2. Configure your OpenAI API key (or other LLM provider) in the `.env` file
+1. **Neo4j Setup**: Configure your Neo4j database connection in
+   `docker-compose.dev.yml` or set the `NEO4J_URL` environment variable
+2. **API Key**: Set your OpenAI API key via the `LLM_API_KEY` environment
+   variable
+3. **Graph Rules**: Create a YAML configuration file defining your knowledge
+   graph schema
 
 ### Basic Usage
 
-TODO: Add usage instructions
+The project provides a CLI tool called `stellar-cli` with the following
+commands:
 
-### Import Options
+#### Test Configuration
 
-TODO: Add import options
+Test your graph rules configuration:
+
+```bash
+stellar-cli test config --config-path path/to/config.yaml
+```
+
+#### Build Knowledge Graph
+
+Build a knowledge graph from documents:
+
+```bash
+stellar-cli kg build \
+    --documents-path /path/to/documents \
+    --config-path path/to/config.yaml \
+    --neo4j-url bolt://localhost:7687 \
+    --llm-api-key your-openai-api-key
+```
+
+**Options:**
+
+- `--documents-path`: Folder containing documents to process
+- `--pattern`: Optional file pattern (e.g., "*.pdf") to filter documents
+- `--config-path`: Path to YAML configuration file with graph rules
+- `--neo4j-url`: Neo4j database connection URL
+- `--llm-api-key`: OpenAI API key for LLM access
+
+### Configuration File Example
+
+Create a YAML file (e.g., `config.yaml`) with your graph rules:
+
+```yaml
+strict_mode: true
+
+allowed_nodes:
+  - Microorganism
+  - Bacteria
+  - Fungi
+  - Plant
+  - Compound
+  - Enzyme
+  - Gene
+
+allowed_relationships:
+  - [Microorganism, PRODUCES, Compound]
+  - [Microorganism, PRODUCES, Enzyme]
+  - [Plant, RECRUITS, Microorganism]
+  - [Microorganism, ACTS_IN, Plant]
+
+node_properties:
+  - ScientificName
+  - CommonName
+  - Description
+
+relationship_properties:
+  - ReferenceId
+  - ProductionDate
+
+prompt: |
+  You are a helpful assistant that helps with building a graph of biological 
+  relationships. Focus on microbial and host entities, environment and 
+  conditions entities, microbial-to-microbial relationships, plant-to-microbial 
+  relationships, etc.
+
+chunk_size: 10000
+chunk_overlap: 200
+```
+
+## Key Features
+
+### Tool-Based Extraction
+
+- Uses OpenAI's function calling for structured extraction
+- Ensures consistent and validated output
+- Supports complex entity and relationship schemas
+
+### Flexible Document Processing
+
+- Automatic PDF to markdown conversion
+- Configurable text chunking strategies
+- Support for multiple document formats
+
+### Configurable Graph Schema
+
+- YAML-based configuration for graph rules
+- Validation of allowed nodes and relationships
+- Customizable properties for entities and connections
+
+### Neo4j Integration
+
+- Direct integration with Neo4j graph database
+- Automatic graph document registration
+- Support for source tracking and metadata
+
+### CLI Interface
+
+- Simple command-line interface for all operations
+- Environment variable support for configuration
+- Comprehensive error handling and logging
 
 ## Use Cases
 
 - **Scientific Literature**: Extract research findings, chemical compounds, and
-  biological relationships
-- **Business Intelligence**: Map organizational structures and business
-  relationships
-- **Legal Documents**: Identify entities, relationships, and key information
-- **Medical Research**: Connect symptoms, treatments, and patient outcomes
-- **Academic Research**: Build comprehensive knowledge bases from research
-  papers
+  biological relationships from research papers
+- **Biological Research**: Map microorganism interactions, gene relationships,
+  and metabolic pathways
+- **Agricultural Studies**: Connect plant-microbe interactions and environmental
+  conditions
+- **Medical Research**: Identify drug-compound relationships and biological
+  processes
+- **Academic Research**: Build comprehensive knowledge bases from scientific
+  documents
 
 ## Architecture
 
 ```mermaid
-Documents → LLM Graph Transformer → Structured Graph → Neo4j Database
-    ↓              ↓                    ↓              ↓
-PDF/Text    Entity Extraction    Nodes & Edges    Graph Storage
+Documents → Docling Converter → Text Chunks → LLM Graph Transformer → Structured Graph → Neo4j Database
+    ↓              ↓                    ↓              ↓                    ↓              ↓
+PDF/Text    Markdown Output    Configurable    Tool-Based    Nodes & Edges    Graph Storage
+            with Metadata      Chunking        Extraction    with Properties
 ```
 
 ## Contributing
