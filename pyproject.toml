@@ -3,7 +3,10 @@ name = "noosphere"
 license = "Apache-2.0"
 version = "0.1.0"
 description = "A simple tool to generate knowledge graphs from documents"
-authors = [{ name = "Samuel Galvão Elias", email = "sgelias@outlook.com" }]
+authors = [
+    { name = "Samuel Galvão Elias", email = "sgelias@outlook.com" },
+    { name = "Lepista Bioinformatics Lab", email = "dev@lepista.io" }
+]
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 dependencies = [

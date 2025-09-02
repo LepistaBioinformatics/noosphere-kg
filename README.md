@@ -1,9 +1,13 @@
-# Noosphere
+# Noosphere by Lepista Bioinformatics Lab
 
 A powerful CLI tool for building knowledge graphs from unstructured text
 documents using Large Language Models (LLMs) and the LangChain LLM Graph
 Transformer. This project specializes in **tool-based extraction** for more
 accurate and consistent knowledge graph construction.
+
+> [!NOTE] Noosphere refers to the overall process of building a knowledge graph
+> from unstructured text documents. This is described as the planetary "sphere
+> of reason".
 
 ## What is a Knowledge Graph?
 
