@@ -1,5 +1,5 @@
 [project]
-name = "noosphere"
+name = "noosphere-kg"
 license = "Apache-2.0"
 version = "0.2.0a0"
 description = "A simple tool to generate knowledge graphs from documents"
