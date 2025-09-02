@@ -10,9 +10,9 @@ from docling.datamodel.base_models import InputFormat
 from langchain_openai import ChatOpenAI
 from termcolor import colored
 
-from stellar_kg_builder.__version__ import version
-from stellar_kg_builder.models.graph_rules import GraphRules
-from stellar_kg_builder.service.neo4j_graph_service import Neo4JGraphService
+from noosphere.__version__ import version
+from noosphere.models.graph_rules import GraphRules
+from noosphere.service.neo4j_graph_service import Neo4JGraphService
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def __inject_dependencies(func):
     def wrapper(*args, **kwargs):
         from functools import partial
 
-        from stellar_kg_builder.service import Neo4JGraphService
+        from noosphere.service import Neo4JGraphService
 
         # Graph rules is required
         if (config_path := kwargs.get("config_path")) is None:

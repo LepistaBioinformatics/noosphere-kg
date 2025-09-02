@@ -1,5 +1,5 @@
 [project]
-name = "stellar-kg-builder"
+name = "noosphere"
 license = "Apache-2.0"
 version = "0.1.0"
 description = "A simple tool to generate knowledge graphs from documents"
@@ -26,11 +26,11 @@ black = "^25.1.0"
 flake8 = "^7.3.0"
 
 [project.urls]
-Homepage = "https://github.com/LepistaBio/stellar-kg-builder"
+Homepage = "https://github.com/LepistaBio/noosphere"
 
 [tool.poetry]
 packages = [
-    { include = "stellar_kg_builder", from = "src" },
+    { include = "noosphere", from = "src" },
     { include = "tests", from = "src" },
 ]
 
@@ -48,7 +48,7 @@ build-backend = "poetry.core.masonry.api"
 # ? ----------------------------------------------------------------------------
 
 [tool.poetry.scripts]
-stellar-cli = "stellar_kg_builder.ports.cli.main:main"
+noosphere-cli = "noosphere.ports.cli.main:main"
 
 # ? ----------------------------------------------------------------------------
 # ? Code consistence

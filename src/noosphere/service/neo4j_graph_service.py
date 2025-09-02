@@ -14,11 +14,11 @@ from langchain_neo4j import Neo4jGraph
 from langchain_openai.chat_models.base import BaseChatOpenAI
 from termcolor import colored
 
-from stellar_kg_builder.exceptions import (
+from noosphere.exceptions import (
     BuildGraphException,
     RegisterGraphDocumentsException,
 )
-from stellar_kg_builder.models import GraphRules
+from noosphere.models import GraphRules
 
 logger = logging.getLogger(__name__)
 

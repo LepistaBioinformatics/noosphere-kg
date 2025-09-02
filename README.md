@@ -1,4 +1,4 @@
-# Stellar Knowledge Graph Builder
+# Noosphere
 
 A powerful CLI tool for building knowledge graphs from unstructured text
 documents using Large Language Models (LLMs) and the LangChain LLM Graph
@@ -29,9 +29,9 @@ Knowledge graphs are particularly valuable for:
 
 ## How It Works
 
-The Stellar Knowledge Graph Builder leverages LangChain's LLM Graph Transformer
-with **tool-based extraction** to automatically extract structured information
-from unstructured text documents. Here's how the process works:
+The Noosphere Knowledge Graph Builder leverages LangChain's LLM Graph
+Transformer with **tool-based extraction** to automatically extract structured
+information from unstructured text documents. Here's how the process works:
 
 ### 1. Document Processing
 
@@ -101,7 +101,7 @@ The constructed knowledge graph is stored in Neo4j, providing:
 
     ```bash
     git clone <repository-url>
-    cd stellar-kg
+    cd noosphere
     ```
 
 2. Create a virtual environment:
@@ -128,7 +128,7 @@ The constructed knowledge graph is stored in Neo4j, providing:
 
 ### Basic Usage
 
-The project provides a CLI tool called `stellar-cli` with the following
+The project provides a CLI tool called `noosphere-cli` with the following
 commands:
 
 #### Test Configuration
@@ -136,7 +136,7 @@ commands:
 Test your graph rules configuration:
 
 ```bash
-stellar-cli test config --config-path path/to/config.yaml
+noosphere-cli test config --config-path path/to/config.yaml
 ```
 
 #### Build Knowledge Graph
@@ -144,7 +144,7 @@ stellar-cli test config --config-path path/to/config.yaml
 Build a knowledge graph from documents:
 
 ```bash
-stellar-cli kg build \
+noosphere-cli kg build \
     --documents-path /path/to/documents \
     --config-path path/to/config.yaml \
     --neo4j-url bolt://localhost:7687 \
