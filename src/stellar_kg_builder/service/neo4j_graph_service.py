@@ -2,13 +2,22 @@ import logging
 from typing import Any
 from urllib.parse import urlparse
 
-from langchain_community.graphs import Neo4jGraph
+from langchain.text_splitter import (
+    MarkdownHeaderTextSplitter,
+    MarkdownTextSplitter,
+)
 from langchain_community.graphs.graph_document import GraphDocument
 from langchain_core.documents import Document
+from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_experimental.graph_transformers import LLMGraphTransformer
+from langchain_neo4j import Neo4jGraph
 from langchain_openai.chat_models.base import BaseChatOpenAI
 from termcolor import colored
 
+from stellar_kg_builder.exceptions import (
+    BuildGraphException,
+    RegisterGraphDocumentsException,
+)
 from stellar_kg_builder.models import GraphRules
 
 logger = logging.getLogger(__name__)
@@ -89,8 +98,38 @@ class Neo4JGraphService:
 
             raise ValueError("Errors found in documents.")
 
+        prompt = None
+        if self.__graph_rules.prompt:
+            prompt = ChatPromptTemplate.from_template(self.__graph_rules.prompt)
+
+        chunked_documents: list[Document] = []
+        for document in documents:
+            try:
+                splitted_documents = MarkdownHeaderTextSplitter(
+                    headers_to_split_on=[("#", "Header 1"), ("##", "Header 2")],
+                ).split_text(document.page_content)
+
+                if len(splitted_documents) > 0:
+                    chunked_documents.extend(splitted_documents)
+                    continue
+
+                splitted_documents = MarkdownTextSplitter(
+                    chunk_size=self.__graph_rules.chunk_size,
+                    chunk_overlap=self.__graph_rules.chunk_overlap,
+                    add_start_index=self.__graph_rules.add_start_index,
+                    strip_whitespace=self.__graph_rules.strip_whitespace,
+                ).split_text(document.page_content)
+
+                chunked_documents.extend(
+                    Document(page_content=doc) for doc in splitted_documents
+                )
+            except Exception as e:
+                raise BuildGraphException(e) from e
+
         transformer = LLMGraphTransformer(
             llm=self.__llm,
+            prompt=prompt,
+            additional_instructions=self.__graph_rules.additional_instructions,
             strict_mode=self.__graph_rules.strict_mode,
             allowed_nodes=self.__graph_rules.allowed_nodes,
             allowed_relationships=self.__graph_rules.allowed_relationships,
@@ -98,7 +137,7 @@ class Neo4JGraphService:
             relationship_properties=self.__graph_rules.relationship_properties,
         )
 
-        return await transformer.aconvert_to_graph_documents(documents)
+        return await transformer.aconvert_to_graph_documents(chunked_documents)
 
     def register_graph_documents(
         self,
@@ -107,30 +146,36 @@ class Neo4JGraphService:
     ) -> bool:
         """Register a graph documents."""
 
-        errors = []
-        for document in documents:
-            if not isinstance(document, GraphDocument):
-                logger.warning(
-                    colored(f"Document {document.id} is not a GraphDocument.", "yellow")
-                )
-                errors.append(
-                    (
-                        document,
-                        "is not a GraphDocument.",
+        try:
+            errors = []
+            for document in documents:
+                if not isinstance(document, GraphDocument):
+                    logger.warning(
+                        colored(
+                            f"Document {document.id} is not a GraphDocument.", "yellow"
+                        )
                     )
-                )
-                continue
-        if errors:
-            logger.error(colored("Errors found in documents.", "red"))
-            for error in errors:
-                logger.error(colored(error[0], "red"), error[1])
+                    errors.append(
+                        (
+                            document,
+                            "is not a GraphDocument.",
+                        )
+                    )
+                    continue
+            if errors:
+                logger.error(colored("Errors found in documents.", "red"))
+                for error in errors:
+                    logger.error(colored(error[0], "red"), error[1])
 
-            raise ValueError("Errors found in documents.")
+                raise ValueError("Errors found in documents.")
 
-        self.__neo4j_graph.add_graph_documents(
-            documents,
-            baseEntityLabel=self.__graph_rules.base_entity_label or False,
-        )
+            self.__neo4j_graph.add_graph_documents(
+                documents,
+                baseEntityLabel=self.__graph_rules.base_entity_label or False,
+                include_source=True,
+            )
+        except Exception as e:
+            raise RegisterGraphDocumentsException(e) from e
 
     # --------------------------------------------------------------------------
     # Private Instance Methods
@@ -156,8 +201,6 @@ class Neo4JGraphService:
         logger.info(f"Parsed Neo4J URL: {self.__neo4j_url}")
 
         # Log the parsed components
-        logger.info(f"Parsed Neo4J User: {self.__neo4j_user}")
-        logger.info(f"Parsed Neo4J Password: {self.__neo4j_password}")
         logger.info(f"Parsed Neo4J Database: {self.__neo4j_database}")
 
     def __init_neo4j_connection(self) -> None:

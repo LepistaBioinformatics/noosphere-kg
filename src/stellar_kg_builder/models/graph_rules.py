@@ -89,6 +89,37 @@ class GraphRules(BaseModel):
     built with base entity label.
     """
 
+    prompt: Optional[str] = None
+    """
+    The prompt to pass to the LLM with additional instructions.
+    """
+
+    additional_instructions: Optional[str] = None
+    """
+    Allows you to add additional instructions to the prompt without having to
+    change the whole prompt.
+    """
+
+    chunk_size: Optional[int] = 4000
+    """
+    Maximum size of chunks to return.
+    """
+
+    chunk_overlap: Optional[int] = 200
+    """
+    Overlap in characters between chunks.
+    """
+
+    add_start_index: Optional[bool] = False
+    """
+    If `True`, includes chunk's start index in metadata.
+    """
+
+    strip_whitespace: Optional[bool] = True
+    """
+    If `True`, strips whitespace from the start and end of every document.
+    """
+
     # Create a validation for: `allowed_relationships` must be list of strings
     # or a list of 3-item tuples. For tuples, the first and last elements must
     # be in the `allowed_nodes` list.

@@ -74,7 +74,7 @@ def __inject_dependencies(func):
             raise ValueError("LLM API key is required.")
 
         llm = ChatOpenAI(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             api_key=llm_api_key,
         )
 
@@ -233,6 +233,16 @@ async def kg_build(
                 logger.error(f"Errors found in document {document}: {result.errors}")
                 continue
 
+            # Persist markdown to /tmp folder
+            markdown = result.document.export_to_markdown()
+
+            output_path = Path("/tmp").joinpath(document.name).with_suffix(".md")
+
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(markdown)
+
+            logger.debug(f"Document {document} converted successfully.")
+
             target_documents.append(result)
 
         if len(target_documents) == 0:
@@ -256,4 +266,5 @@ async def kg_build(
 
         click.echo(colored("Graph documents registered successfully.", "green"))
     except Exception as e:
+        logger.exception(e)
         click.echo(colored(f"Error building the knowledge graph: {e}", "red"))
